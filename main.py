@@ -14,7 +14,9 @@ def folderChildrens(loops:str):
     print('\033[94m'+"="*12)
     for i in range(numberLoops):
         print(f"StockNames: {stockNames}\n")
-        name = input(f"(${i+1}) Insira o nome do aluno:\n> ")
+        index = i+1
+        name = input(f"({index}) Insira o nome da pasta:\n> ")
+        
         if not name == "":
             stockNames.append(name)
         else:
@@ -26,9 +28,10 @@ def folderChildrens(loops:str):
 def createfoldersNames(folders:list,folderPrincipal:str):
     try:
         for name in folders:
-            paths = f"./{folderPrincipal}/{name}"
-            os.mkdir(paths)
-        return '\033[93m'+"Folder's created!" 
+            os.mkdir(f"./{folderPrincipal}/{name}")
+
+        stringList = ', '.join(folders)
+        return '\033[93m'+ f"Folder's {stringList} created!" 
     except FileExistsError:
         return '\033[95m'+"Folder %s already exists"
 
@@ -37,6 +40,7 @@ def main():
     folderPrincipal = input('\033[95m'+"Nome da pasta:\n> ")
     quantity = input("Quantidade de pastas:\n> ")
     print("="*8)
+    
     folderCreated = initialFolder(folderPrincipal)
     foldersNames = folderChildrens(quantity)
     folderNamesCreated = createfoldersNames(foldersNames,folderPrincipal)
