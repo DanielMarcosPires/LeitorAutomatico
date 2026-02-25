@@ -1,53 +1,68 @@
 import os
+import openpyxl
+import glob
 
-def initialFolder(name:str) -> str:
-    try:
-        os.mkdir(f"./{name}")
-        return "Folder %s created! " % f"./{name}"
-    except FileExistsError:
-        return "Folder %s already exists " % f"./{name}"
+class folder:
+    def __init__(self, name:str):
+        try:
+            os.mkdir(f"./{name}")
+            print("Folder %s created suscefully! " %f"./{name}")
+        except FileExistsError:
+            print("Folder %s already exists " % f"./{name}")
 
-def folderChildrens(loops:str):
-    stockNames = []
-    numberLoops = int(loops)
+    def generateFolders(self, title, names:list): 
+        try: 
+            os.mkdir(f'./{title}')
+            print("Folder %s created suscefully! " %f'./{title}')
+            for name in names:
+                try:
+                    os.mkdir(f'./{title}/{name}')
+                    print("Folder %s created suscefully! " %f'./{title}/{name}')
+                except FileExistsError:
+                    print("Folder %s already exists " % f"./{name}")
+        except FileExistsError:
+            print("Folder %s already exists " % f'./{title}')
 
-    print('\033[94m'+"="*12)
-    for i in range(numberLoops):
-        print(f"StockNames: {stockNames}\n")
-        index = i+1
-        name = input(f"({index}) Insira o nome da pasta:\n> ")
         
-        if not name == "":
-            stockNames.append(name)
-        else:
-            print("Não deve ser vazio!")
-            break
-    print("="*12)
-    return stockNames
+class excel:
+    def reader(self,folderReader:str) -> dict:
+        listNames = []
 
-def createfoldersNames(folders:list,folderPrincipal:str):
-    try:
-        for name in folders:
-            os.mkdir(f"./{folderPrincipal}/{name}")
+        arquivos = glob.glob(f'./{folderReader}/*.xlsx')
+        
+        if not arquivos:
+            print("Folder's not found!")
+            return # type: ignore
 
-        stringList = ', '.join(folders)
-        return '\033[93m'+ f"Folder's {stringList} created!" 
-    except FileExistsError:
-        return '\033[95m'+"Folder %s already exists"
+        folderPath = arquivos[0]
+
+        wb = openpyxl.load_workbook(folderPath)
+        sheet = wb.active
+
+        for linha in sheet.iter_rows(min_row=2, values_only=True): # pyright: ignore[reportOptionalMemberAccess]
+            listNames.append(linha[0])
+
+        return {'Title': sheet.title,'Names': listNames} # type: ignore
+
 
 def main():
-    print("="*8)
-    folderPrincipal = input('\033[95m'+"Nome da pasta:\n> ")
-    quantity = input("Quantidade de pastas:\n> ")
-    print("="*8)
+    print("Program Iniciated! \n")
+    folderReader = "Leitor de Planilha"
+
+    fold = folder(folderReader)
+    excelSheet = excel().reader(folderReader) # type: ignore
     
-    folderCreated = initialFolder(folderPrincipal)
-    foldersNames = folderChildrens(quantity)
-    folderNamesCreated = createfoldersNames(foldersNames,folderPrincipal)
+    title = excelSheet['Title']
+    names = excelSheet['Names']
     
-    print("="*8)
-    print(folderNamesCreated)
-    print('\033[92m'+"="*8)
+    print(title)
+    print(names)
+    fold.generateFolders(title,names) 
+    
+
+
 
 if __name__ == "__main__":
-    main()
+     print("="*24)
+     main()
+     print("="*24)
