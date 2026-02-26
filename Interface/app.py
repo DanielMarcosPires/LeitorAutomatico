@@ -10,7 +10,7 @@ class App(customtkinter.CTk):
 
 
 
-
+#teste
 
 app = App()
 app.mainloop()
