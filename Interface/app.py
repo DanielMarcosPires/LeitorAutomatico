@@ -7,9 +7,11 @@ class App(customtkinter.CTk):
 
         self.title("my-app")
         self.geometry("750x750")
-        # Instancia o componente passando 'self' como pai
+       
+        self.grid_columnconfigure(0,weight=1)
+
         self.meu_form = form(master=self)
-        self.meu_form.pack(expand=True)
+        self.meu_form.pack()
       
 
     def mostrar_dados(self):

@@ -1,9 +1,12 @@
 import customtkinter 
+from fonts.fonts import Fonts
 
 class form(customtkinter.CTkFrame):
+    fonts = Fonts()
     def __init__(self,master,**kwargs):
         super().__init__(master,**kwargs)
         self.inputs = {}
+
         self.inputBox(
             label="User:",
             entry="User:"
@@ -12,7 +15,7 @@ class form(customtkinter.CTkFrame):
             label="Password:",
             entry="Password:"
         )
-        self.button = customtkinter.CTkButton(self,text="Enviar!",command=self.login_action)
+        self.button = customtkinter.CTkButton(self,text="Enviar!",width=200,height=40,font=(self.fonts.BUTTON),command=self.login_action)
         self.button.pack(pady=20)
 
 
@@ -27,12 +30,12 @@ class form(customtkinter.CTkFrame):
 
     #Componentes
     def label(self, text:str):
-        ctkLabel = customtkinter.CTkLabel(self,text=text)
-        ctkLabel.pack()
+        ctkLabel = customtkinter.CTkLabel(self,text=text,font=(self.fonts.LABEL))
+        ctkLabel.pack(padx=20, pady=(10, 0), anchor="w")
 
     def entry(self,prompt:str):
-        inputBox = customtkinter.CTkEntry(self, placeholder_text=prompt)
-        inputBox.pack(padx=10,pady=20)
+        inputBox = customtkinter.CTkEntry(self, placeholder_text=prompt,font=(self.fonts.ENTRY), width=300, height=40)
+        inputBox.pack(padx=20,pady=5, fill="x")
         return inputBox
     #Retornos dos valores
     def get_values(self):
