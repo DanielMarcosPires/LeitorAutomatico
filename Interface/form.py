@@ -11,12 +11,14 @@ class form(customtkinter.CTkFrame):
         self.title("Formulario")
 
         self.inputBox(
-            label="User:",
-            entry="User:"
+            label="Insert your username:",
+            entry="Username",
+            dataType="username"
         )
         self.inputBox(
-            label="Password:",
-            entry="Password:"
+            label="Insert your password:",
+            entry="*******",
+            dataType="password"
         )
         self.button = customtkinter.CTkButton(self,text="Enviar!",width=200,height=40,font=(self.fonts.BUTTON),command=self.login_action)
         self.button.pack(pady=20)
@@ -24,15 +26,21 @@ class form(customtkinter.CTkFrame):
 
     def login_action(self):
         dados = self.get_values()
-        print(f"Tentativa de login com: {dados}")
 
-        username = "DanielMarcos"
-        password = "1234"
+        username = dados["username"]
+        password = dados["password"]
+
+        usernameKey = "DanielMarcos"
+        passwordKey = "1234"
+
+        if username == usernameKey and password == passwordKey :
+           return True
+        return False
 
     #Junção de dois componentes
-    def inputBox(self, label:str,entry:str):
+    def inputBox(self, label:str,dataType:str,entry:str):
         self.label(label)
-        self.inputs[label] = self.entry(entry)
+        self.inputs[dataType] = self.entry(entry)
 
     #Componentes
 
