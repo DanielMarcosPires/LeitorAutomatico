@@ -1,11 +1,14 @@
-import customtkinter 
-from fonts.fonts import Fonts
+import customtkinter
+
+from Fonts.fonts import Fonts
+
 
 class form(customtkinter.CTkFrame):
     fonts = Fonts()
     def __init__(self,master,**kwargs):
         super().__init__(master,**kwargs)
         self.inputs = {}
+        self.title("Formulario")
 
         self.inputBox(
             label="User:",
@@ -22,20 +25,37 @@ class form(customtkinter.CTkFrame):
     def login_action(self):
         dados = self.get_values()
         print(f"Tentativa de login com: {dados}")
-    
+
+        username = "DanielMarcos"
+        password = "1234"
+
     #Junção de dois componentes
     def inputBox(self, label:str,entry:str):
         self.label(label)
         self.inputs[label] = self.entry(entry)
 
     #Componentes
+
+    def title(self, text:str):
+    # Adicionei pady=(30, 10) para dar espaço no topo
+        ctkTitle = customtkinter.CTkTextbox(self, height=40, font=("Inter", 25, "bold"), fg_color="transparent") 
+        ctkTitle.tag_config("center", justify='center')
+        ctkTitle.insert("0.0", text)
+        ctkTitle.tag_add("center", "1.0", "end")
+        ctkTitle.configure(state="disabled")
+        
+        # pady=(distância_topo, distância_baixo)
+        ctkTitle.pack(fill="x", padx=20, pady=(20, 20))
+
     def label(self, text:str):
         ctkLabel = customtkinter.CTkLabel(self,text=text,font=(self.fonts.LABEL))
         ctkLabel.pack(padx=20, pady=(10, 0), anchor="w")
 
-    def entry(self,prompt:str):
-        inputBox = customtkinter.CTkEntry(self, placeholder_text=prompt,font=(self.fonts.ENTRY), width=300, height=40)
-        inputBox.pack(padx=20,pady=5, fill="x")
+    def entry(self, prompt:str):
+        # Remova o fill="x" se quiser um tamanho fixo, 
+        # ou mantenha se quiser que sigam a largura do Frame pai
+        inputBox = customtkinter.CTkEntry(self, placeholder_text=prompt, font=(self.fonts.ENTRY), width=350, height=45)
+        inputBox.pack(padx=20, pady=10) 
         return inputBox
     #Retornos dos valores
     def get_values(self):
