@@ -1,5 +1,5 @@
 import os
-from Classes.bgColors import bcolors
+from Interface.Classes.bgColors import bcolors
 
 class folder:
     def __init__(self, name:str):
