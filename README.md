@@ -50,16 +50,23 @@ LeitorAutomatico/
 
 ## Como Executar
 
-1. Certifique-se de ter Python 3.13 instalado
-2. Instale as dependências:
-   ```bash
-   pip install customtkinter openpyxl
-   ```
-3. Execute a aplicação:
-   ```bash
-   cd LeitorAutomatico
-   python Interface/app.py
-   ```
+1. Instale o venv nesse projeto utilizando o comando:
+```bash
+   python -m venv venv
+```
+2. Após a instalação ative o Ambiente virtual usando o comando: 
+```bash
+   ./venv/Scripts/Activate
+```
+3. Com o venv instalado antes de executar o projeto precisamos instalar as dependencias do requirements.txt
+com o seguinte comando:
+```bash
+   pip install -r requirements.txt
+```
+4. E por fim execute o projeto utilizando o comando:
+```bash 
+   python ./main.py
+```
 
 ## Funcionalidades Detalhadas
 

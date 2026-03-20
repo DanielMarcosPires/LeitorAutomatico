@@ -35,7 +35,8 @@ class Dashboard(customtkinter.CTkFrame):
     
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
-        
+        self.master.after(0, lambda: self.master.state("zoomed"))  # type: ignore 
+          
         # Carregar ícones
         self._load_icons()
         
@@ -617,8 +618,10 @@ class Dashboard(customtkinter.CTkFrame):
             # Criar janela de visualização com tema Excel
             view_window = customtkinter.CTkToplevel(self)
             view_window.title(f"DaniTechnologia - {os.path.basename(file_path)}")
-            view_window.geometry("950x600")
-            view_window.attributes("-topmost", True)
+            
+            view_window.after(0, lambda: view_window.state("zoomed"))  # Garantir foco na nova janela
+            view_window.bind("<Escape>", lambda e: view_window.destroy())  # Fechar com ESC
+            
             view_window.configure(fg_color="#2b2b2b")  # Fundo escuro Excel
 
             # Frame com Scroll
