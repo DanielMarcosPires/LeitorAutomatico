@@ -79,8 +79,8 @@ class FormColors:
     ENTRY_BORDER = ThemeColors.BORDER_PRIMARY
     ENTRY_TEXT = ThemeColors.TEXT_PRIMARY
 
-    BUTTON_BACKGROUND = ThemeColors.BUTTON_PRIMARY
-    BUTTON_HOVER = ThemeColors.BUTTON_HOVER
+    BUTTON_BACKGROUND = ThemeColors.BUTTON_HOVER
+    BUTTON_HOVER = ThemeColors.BUTTON_PRIMARY
     BUTTON_TEXT = ThemeColors.TEXT_PRIMARY
 
 class DashboardColors:

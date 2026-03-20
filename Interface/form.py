@@ -68,7 +68,7 @@ class form(customtkinter.CTkFrame):
         ctkTitle = customtkinter.CTkTextbox(
             self, 
             height=40, 
-            font=("Inter", 25, "bold"), 
+            font=self.fonts.MAIN_TITLE, 
             fg_color=FormColors.TITLE_BACKGROUND,  # Azul Excel header
             text_color=FormColors.TITLE_TEXT  # Texto branco para contraste
         ) 
