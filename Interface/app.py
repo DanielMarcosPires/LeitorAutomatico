@@ -12,7 +12,21 @@ class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
         self.title("Leitor Automático - DaniTechnologia")
-        self.geometry("750x750")
+        
+            # 1. Definimos o tamanho desejado
+        largura_janela = 750
+        altura_janela = 550
+
+        # 2. Pegamos a largura e altura da tela do computador
+        largura_tela = self.winfo_screenwidth()
+        altura_tela = self.winfo_screenheight()
+
+        # 3. Calculamos a posição X e Y para o centro
+        pos_x = (largura_tela // 2) - (largura_janela // 2)
+        pos_y = (altura_tela // 2) - (altura_janela // 2)
+
+        # 4. Definimos a geometria final: "LARGURAxALTURA+X+Y"
+        self.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
 
         # Configurar cores da janela principal (estilo Excel)
         
@@ -20,7 +34,7 @@ class App(customtkinter.CTk):
         
         # Instanciar e exibir o formulário de login
         self.meu_form = form(master=self)
-        self.meu_form.pack(pady=20, expand=True, fill="both")
+        self.meu_form.place(relx=0.5, rely=0.5, anchor="center")  # Centralizar o formulário
 
         self.dashboard = None
 

@@ -10,11 +10,12 @@ do aplicativo de gerenciamento de planilhas. Inclui funcionalidades para:
 - Criar relatórios consolidados
 """
 
+import tksvg
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from PIL import Image
 from Interface.Fonts.fonts import Fonts
-from Interface.colors import DashboardColors, ViewColors, ExcelColors
+from Interface.colors import DashboardColors, ViewColors, InterfaceColors
 import tkinter.filedialog as filedialog
 from Interface.Classes.folders import folder
 import os 
@@ -42,18 +43,48 @@ class Dashboard(customtkinter.CTkFrame):
         self._load_icons()
         
         # Configurar o título principal
-        self._setup_title()
+        self.title()
         
         # Configurar o layout principal com frames esquerdo e direito
-        self._setup_main_layout()
+        self.main_layout()
         
         # Configurar os botões no frame esquerdo
-        self._setup_buttons()
+        self.buttons()
         
         # Configurar a lista de planilhas no frame direito
-        self._setup_excel_list()
+        self.excel_list()
     
-    def _setup_title(self):
+    
+    def _load_icons(self):
+        """Carrega os ícones dos botões a partir da pasta Interface/icon/."""
+        self.icons = {}
+        
+        # Mapeamento de nomes de ícones para arquivos
+        icon_files = {
+            'relatory': 'relatory.png',
+            'view': 'view.png', 
+            'reload': 'reload.png',
+            'exit': 'exit.png',
+            'excel_logo': 'cells.png',
+            'trash': 'trash.png',
+            'folder': 'folder.png'
+        }
+        
+        # Caminho base para os ícones
+        icon_base_path = os.path.join(os.path.dirname(__file__), 'icon')
+        
+        for icon_name, filename in icon_files.items():
+            icon_path = os.path.join(icon_base_path, filename)
+            try:
+                # Carregar imagem com PIL e redimensionar para 20x20 pixels
+                pil_image = Image.open(icon_path)
+                pil_image = pil_image.resize((20, 20), Image.Resampling.LANCZOS)
+                self.icons[icon_name] = customtkinter.CTkImage(light_image=pil_image, dark_image=pil_image, size=(20, 20))
+            except (FileNotFoundError, OSError) as e:
+                print(f"Aviso: Ícone '{filename}' não encontrado em {icon_path}. Usando texto apenas.")
+                self.icons[icon_name] = None
+    
+    def title(self):
         """Configura o título principal com botão Sair na direita."""
         title_frame = customtkinter.CTkFrame(
             self,
@@ -89,36 +120,7 @@ class Dashboard(customtkinter.CTkFrame):
         )
         btn_sair.pack(side="right", padx=20, pady=5)
     
-    def _load_icons(self):
-        """Carrega os ícones dos botões a partir da pasta Interface/icon/."""
-        self.icons = {}
-        
-        # Mapeamento de nomes de ícones para arquivos
-        icon_files = {
-            'relatory': 'relatory.png',
-            'view': 'view.png', 
-            'reload': 'reload.png',
-            'exit': 'exit.png',
-            'excel_logo': 'cells.png',
-            'trash': 'trash.png',
-            'folder': 'folder.png'
-        }
-        
-        # Caminho base para os ícones
-        icon_base_path = os.path.join(os.path.dirname(__file__), 'icon')
-        
-        for icon_name, filename in icon_files.items():
-            icon_path = os.path.join(icon_base_path, filename)
-            try:
-                # Carregar imagem com PIL e redimensionar para 20x20 pixels
-                pil_image = Image.open(icon_path)
-                pil_image = pil_image.resize((20, 20), Image.Resampling.LANCZOS)
-                self.icons[icon_name] = customtkinter.CTkImage(light_image=pil_image, dark_image=pil_image, size=(20, 20))
-            except (FileNotFoundError, OSError) as e:
-                print(f"Aviso: Ícone '{filename}' não encontrado em {icon_path}. Usando texto apenas.")
-                self.icons[icon_name] = None
-    
-    def _setup_main_layout(self):
+    def main_layout(self):
         """Configura o layout principal com cores do Excel."""
         self.main_frame = customtkinter.CTkFrame(
             self,
@@ -139,8 +141,9 @@ class Dashboard(customtkinter.CTkFrame):
         self.left_frame.pack(side="left", fill="y", padx=10, pady=10)
         self.left_frame.pack_propagate(False)  # Manter largura fixa
 
-        # Título do frame esquerdo
-        self._setup_left_title()
+        self.logoDevice()  # Logo personalizada
+
+        self.adesivos()  # Adesivo voando no meio da tela
 
         # Frame direito para lista de planilhas
         self.right_frame = customtkinter.CTkFrame(
@@ -151,7 +154,51 @@ class Dashboard(customtkinter.CTkFrame):
         )
         self.right_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
     
-    def _setup_left_title(self):
+    def logoDevice(self):
+        """Unifica ACELERA e G&P na mesma linha corrigindo o erro de fonte"""
+        ctkTitle = customtkinter.CTkTextbox(
+            self.left_frame, 
+            fg_color="transparent",
+            height=50,
+            text_color=DashboardColors.LEFT_TITLE_TEXT,
+            activate_scrollbars=False,
+            wrap="none"
+        )
+        
+        # Criamos as fontes (o CTkFont ajuda a manter o scaling no restante do app)
+        font_acelera = customtkinter.CTkFont(family="Montserrat", size=28, weight="bold")
+        font_gp = customtkinter.CTkFont(family="Inter", size=24, weight="bold")
+
+        # ACESSO DIRETO AO TKINTER:
+        # Usamos ctkTitle._textbox para configurar as tags diretamente no widget base
+        ctkTitle._textbox.tag_config("font_acelera", font=font_acelera, foreground="#f9c319")
+        ctkTitle._textbox.tag_config("font_gp", font=font_gp, foreground="#fff")
+        ctkTitle._textbox.tag_config("center", justify='center')
+
+        # Inserção
+        ctkTitle.insert("0.0", "ACELERA", "font_acelera")
+        ctkTitle.insert("end", " G&P", "font_gp") 
+        
+        # Aplica a centralização em tudo
+        ctkTitle.tag_add("center", "1.0", "end")
+        
+        ctkTitle.configure(state="disabled")
+        ctkTitle.pack(fill="x", padx=20, pady=(20, 10))  
+        
+    def logoText(self,text:str,fontFamily:str=None,weight:str=None): # pyright: ignore[reportArgumentType]
+        ctkTitle = customtkinter.CTkTextbox(
+            self.left_frame, 
+            height=30, 
+            font=self.fonts.LOGO if not fontFamily else (fontFamily, 24, weight or "bold"),
+            text_color=DashboardColors.LEFT_TITLE_TEXT
+        )
+        ctkTitle.tag_config("center", justify='center')
+        ctkTitle.insert("0.0", text)
+        ctkTitle.tag_add("center", "1.0", "end")
+        ctkTitle.configure(state="disabled")
+        ctkTitle.pack(fill="x", padx=20, pady=(20, 10))
+            
+    def left_title(self):
         """Configura o título do painel esquerdo com estilo Excel."""
         ctkTitle = customtkinter.CTkTextbox(
             self.left_frame, 
@@ -165,7 +212,7 @@ class Dashboard(customtkinter.CTkFrame):
         ctkTitle.configure(state="disabled")
         ctkTitle.pack(fill="x", padx=20, pady=(20, 10))
     
-    def _setup_buttons(self):
+    def buttons(self):
         """Configura os botões de ação no painel esquerdo."""
         # Botão Gerar Relatório
         
@@ -185,12 +232,13 @@ class Dashboard(customtkinter.CTkFrame):
         )
         btn_relatorio.pack(side="bottom",fill="x", pady=6, anchor="w", padx=8)
 
+
         # Botão Visualizar
         btn_visualizar = customtkinter.CTkButton(
             self.left_frame,
             text="Visualizar",
             image=self.icons.get('view'),
-            fg_color=DashboardColors.BUTTON_BACKGROUND,
+            fg_color=DashboardColors.BUTTON_BACKGROUND_SECONDARY,
             hover_color=DashboardColors.BUTTON_HOVER,
             text_color=DashboardColors.BUTTON_TEXT,
             width=170,
@@ -207,7 +255,7 @@ class Dashboard(customtkinter.CTkFrame):
             self.left_frame,
             text="Atualizar",
             image=self.icons.get('reload'),
-            fg_color=DashboardColors.BUTTON_BACKGROUND,
+            fg_color=DashboardColors.BUTTON_BACKGROUND_SECONDARY,
             hover_color=DashboardColors.BUTTON_HOVER,
             text_color=DashboardColors.BUTTON_TEXT,
             width=170,
@@ -226,7 +274,7 @@ class Dashboard(customtkinter.CTkFrame):
             os.makedirs(planilhas_dir)
         os.startfile(planilhas_dir)  # Abrir pasta no explorador de arquivos (Windows)    
     
-    def _setup_excel_list(self):
+    def excel_list(self):
         """Configura a lista de planilhas no painel direito com título e botões no topo."""
         # Frame para título e botões na mesma linha
         header_frame = customtkinter.CTkFrame(
@@ -330,6 +378,23 @@ class Dashboard(customtkinter.CTkFrame):
         )
         self.result_textbox.pack(fill="x", padx=10, pady=10)
     
+    def adesivos(self):
+        # Caminho do arquivo
+        svg_path = os.path.join(os.path.dirname(__file__), 'icon', 'aceleraRocket.svg')
+        
+        # Criamos a imagem SVG compatível com Tkinter
+        # Nota: O CTkLabel aceita imagens do PhotoImage padrão do tksvg
+        self.adesivo_image = tksvg.SvgImage(file=svg_path, scale=1.0) # Ajuste o scale se necessário
+
+        self.adesivo_label = customtkinter.CTkLabel(
+            self.main_frame,
+            image=self.adesivo_image, # type: ignore
+            text="",
+            fg_color="transparent" # Garante que não haja fundo
+        )
+        # Para garantir que ele fique NO TOPO de tudo:
+        self.adesivo_label.place(x=70, y=150)
+        
     def logout(self):
         """Retorna à tela de login."""
         self.pack_forget()
@@ -346,7 +411,7 @@ class Dashboard(customtkinter.CTkFrame):
             # Salvar cor atual antes do hover
             current_color = frame.cget("fg_color")
             frame._original_color = current_color
-            frame.configure(fg_color="#6B9BD1")  # Azul Excel hover (#6B9BD1)
+            frame.configure(fg_color="#A04800") 
         else:
             # Restaurar cor original
             if hasattr(frame, '_original_color'):
@@ -362,7 +427,7 @@ class Dashboard(customtkinter.CTkFrame):
         - Hover: Azul mais claro (#6B9BD1)
         """
         if checkbox.get() == 1:  # Selecionado
-            frame.configure(fg_color="#4F81BD")  # Azul Excel
+            frame.configure(fg_color="#A04800")
         else:  # Não selecionado
             frame.configure(fg_color="#2a2a2a")  # Fundo escuro
     

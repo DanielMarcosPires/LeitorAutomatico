@@ -10,67 +10,68 @@ Paleta baseada no Microsoft Excel:
 - Contraste alto: Branco em fundos escuros
 """
 
-class ExcelColors:
-    """Paleta de cores inspirada no Microsoft Excel"""
+class InterfaceColors:
+    """Paleta de cores da interface - Ajustada para Identidade ACELERA G&P"""
 
-    # === CORES PRINCIPAIS DO EXCEL ===
-    EXCEL_BLUE = "#4F81BD"          # Azul clássico do Excel
-    EXCEL_BLUE_LIGHT = "#6B9BD1"    # Azul mais claro para hover
-    EXCEL_BLUE_DARK = "#2E5C8A"     # Azul mais escuro para hover
+    # === CORES PRINCIPAIS (Substituído o 'Azul' pelo Amarelo da Logo) ===
+    INTERFACE_BLUE = "#F9C319"          # Amarelo Principal da Logo
+    INTERFACE_BLUE_LIGHT = "#FFD133"    # Amarelo mais claro para hover
+    INTERFACE_BLUE_DARK = "#C79C14"     # Amarelo mais escuro para estados pressionados
 
     # === VERMELHO PARA AÇÕES CRÍTICAS ===
-    EXCEL_RED = "#C00000"           # Vermelho Excel para sair/fechar
-    EXCEL_RED_DARK = "#8B0000"      # Vermelho mais escuro
+    # Ajustado para um coral/laranja vibrante que harmoniza com amarelo sem "brigar"
+    INTERFACE_RED = "#FF6701"           # Vermelho moderno (Flat)
+    INTERFACE_RED_DARK = "#C0392B"      # Vermelho escuro para hover
 
     # === VERDES E LARANJA PARA STATUS ===
-    SUCCESS_GREEN = "#2ecc71"       # Verde para status positivo
-    WARNING_ORANGE = "#e67e22"      # Laranja para atenção/pendente
+    SUCCESS_GREEN = "#27AE60"           # Verde Esmeralda (Status Positivo)
+    WARNING_ORANGE = "#F39C12"          # Laranja Flat (Atenção)
 
-    # === CINZAS E FUNDO ===
-    GRAY_LIGHT = "#f8f9fa"          # Cinza muito claro (modo claro)
-    GRAY_MEDIUM = "#e1e5e9"         # Cinza médio para bordas
-    GRAY_DARK = "#404040"          # Cinza escuro para bordas
+    # === CINZAS E FUNDO (Inspirado no fundo da logo) ===
+    GRAY_LIGHT = "#2D2D2D"              # Cinza da logo (ideal para painéis laterais)
+    GRAY_MEDIUM = "#3D3D3D"             # Cinza médio para separadores/bordas
+    GRAY_DARK = "#1A1A1A"               # Cinza quase preto para o fundo principal
 
 class ThemeColors:
     """Cores do tema escuro inspirado no Excel"""
 
     # === FUNDO DA APLICAÇÃO ===
-    APP_BACKGROUND = "#2b2b2b"      # Fundo principal da aplicação
+    # Usei o tom de cinza carvão da logo para um visual mais "Pro"
+    APP_BACKGROUND = "#1A1A1A"      # Fundo principal da aplicação
 
     # === FRAMES E PAINÉIS ===
-    FRAME_BACKGROUND = "#1e1e1e"    # Fundo dos frames principais
-    PANEL_BACKGROUND = "#2a2a2a"    # Fundo dos painéis internos
-    INPUT_BACKGROUND = "#3a3a3a"    # Fundo dos campos de entrada
+    FRAME_BACKGROUND = "#242424"    # Fundo dos frames principais
+    PANEL_BACKGROUND = "#2D2D2D"    # Fundo dos painéis internos
+    INPUT_BACKGROUND = "#333333"    # Fundo dos campos de entrada
 
     # === SCROLLABLE FRAME ===
-    SCROLL_BACKGROUND = "#2a2a2a"   # Fundo do scrollable frame
+    SCROLL_BACKGROUND = "#242424"   # Fundo do scrollable frame
 
     # === TEXTO ===
-    TEXT_PRIMARY = "#ffffff"        # Texto principal (branco)
-    TEXT_SECONDARY = "#cccccc"      # Texto secundário (cinza claro)
+    TEXT_PRIMARY = "#FFFFFF"        # Texto principal (branco)
+    TEXT_SECONDARY = "#B0B0B0"      # Texto secundário (cinza claro)
 
     # === BORDAS ===
-    BORDER_PRIMARY = ExcelColors.EXCEL_BLUE    # Borda principal
+    BORDER_PRIMARY = InterfaceColors.INTERFACE_BLUE    # Borda principal (Amarelo)
     BORDER_SECONDARY = "#404040"   # Borda secundária
 
     # === SELEÇÃO E HOVER ===
-    SELECTION_BACKGROUND = ExcelColors.EXCEL_BLUE     # Fundo quando selecionado
-    HOVER_BACKGROUND = ExcelColors.EXCEL_BLUE_LIGHT   # Fundo no hover
+    SELECTION_BACKGROUND = InterfaceColors.INTERFACE_BLUE     # Fundo quando selecionado
+    HOVER_BACKGROUND = InterfaceColors.INTERFACE_BLUE_LIGHT   # Fundo no hover
 
     # === BOTÕES ===
-    BUTTON_PRIMARY = ExcelColors.EXCEL_BLUE           # Botão principal
-    BUTTON_SECONDARY = ExcelColors.WARNING_ORANGE        # Botão secundário (azul mais claro)
-    BUTTON_HOVER = ExcelColors.EXCEL_BLUE_DARK        # Hover do botão
-    BUTTON_CRITICAL = ExcelColors.EXCEL_RED           # Botão crítico (sair)
-    BUTTON_CRITICAL_HOVER = ExcelColors.EXCEL_RED_DARK # Hover crítico
-
+    BUTTON_PRIMARY = InterfaceColors.INTERFACE_BLUE           # Botão principal
+    BUTTON_SECONDARY = InterfaceColors.WARNING_ORANGE        # Botão secundário (Laranja)
+    BUTTON_HOVER = InterfaceColors.INTERFACE_BLUE_DARK        # Hover do botão
+    BUTTON_CRITICAL = InterfaceColors.INTERFACE_RED           # Botão crítico (sair)
+    BUTTON_CRITICAL_HOVER = InterfaceColors.INTERFACE_RED_DARK # Hover crítico
 class FormColors:
     """Cores específicas do formulário de login"""
 
     FRAME_BACKGROUND = ThemeColors.FRAME_BACKGROUND
     FRAME_BORDER = ThemeColors.BORDER_PRIMARY
 
-    TITLE_BACKGROUND = ExcelColors.EXCEL_BLUE
+    TITLE_BACKGROUND = InterfaceColors.INTERFACE_BLUE
     TITLE_TEXT = ThemeColors.TEXT_PRIMARY
 
     LABEL_TEXT = ThemeColors.TEXT_PRIMARY
@@ -86,7 +87,7 @@ class FormColors:
 class DashboardColors:
     """Cores específicas do dashboard"""
 
-    TITLE_BACKGROUND = ExcelColors.EXCEL_BLUE
+    TITLE_BACKGROUND = InterfaceColors.INTERFACE_BLUE
     TITLE_TEXT = ThemeColors.TEXT_PRIMARY
 
     MAIN_FRAME_BACKGROUND = ThemeColors.FRAME_BACKGROUND
@@ -98,7 +99,7 @@ class DashboardColors:
     RIGHT_FRAME_BACKGROUND = ThemeColors.FRAME_BACKGROUND
     RIGHT_FRAME_BORDER = ThemeColors.BORDER_PRIMARY
 
-    LEFT_TITLE_BACKGROUND = ExcelColors.EXCEL_BLUE
+    LEFT_TITLE_BACKGROUND = InterfaceColors.INTERFACE_BLUE
     LEFT_TITLE_TEXT = ThemeColors.TEXT_PRIMARY
 
     BUTTON_BACKGROUND = ThemeColors.BUTTON_PRIMARY
@@ -132,14 +133,14 @@ class ViewColors:
     SCROLL_BACKGROUND = ThemeColors.FRAME_BACKGROUND
     SCROLL_BORDER = ThemeColors.BORDER_PRIMARY
 
-    HEADER_BACKGROUND = ExcelColors.EXCEL_BLUE
+    HEADER_BACKGROUND = InterfaceColors.INTERFACE_BLUE
     HEADER_TEXT = ThemeColors.TEXT_PRIMARY
 
     CELL_BACKGROUND = ThemeColors.INPUT_BACKGROUND
     CELL_TEXT = ThemeColors.TEXT_PRIMARY
 
-    STATUS_SUCCESS = ExcelColors.SUCCESS_GREEN
-    STATUS_WARNING = ExcelColors.WARNING_ORANGE
+    STATUS_SUCCESS = InterfaceColors.SUCCESS_GREEN
+    STATUS_WARNING = InterfaceColors.WARNING_ORANGE
 
 # === CONFIGURAÇÕES GLOBAIS ===
 APPEARANCE_MODE = "dark"           # "light" ou "dark"

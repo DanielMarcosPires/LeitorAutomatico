@@ -13,7 +13,7 @@ class form(customtkinter.CTkFrame):
         
         self.inputs = {}
         self.title("Login - DaniTechnologia")
-
+        
         self.inputBox(
             label="Usuário:",
             entry="Digite seu usuário",
@@ -22,7 +22,8 @@ class form(customtkinter.CTkFrame):
         self.inputBox(
             label="Senha:",
             entry="Digite sua senha",
-            dataType="password"
+            dataType="password",
+            show="*"
         )
         self.button = customtkinter.CTkButton(
             self,
@@ -57,9 +58,9 @@ class form(customtkinter.CTkFrame):
             return False
         
     #Junção de dois componentes
-    def inputBox(self, label:str,dataType:str,entry:str):
+    def inputBox(self, label:str,dataType:str,entry:str, show:str=None):
         self.label(label)
-        self.inputs[dataType] = self.entry(entry)
+        self.inputs[dataType] = self.entry(entry, show=show)
 
     #Componentes
 
@@ -88,7 +89,7 @@ class form(customtkinter.CTkFrame):
         )
         ctkLabel.pack(padx=20, pady=(10, 0), anchor="w")
 
-    def entry(self, prompt:str):
+    def entry(self, prompt:str, show:str=None):
         inputBox = customtkinter.CTkEntry(
             self, 
             placeholder_text=prompt, 
@@ -97,7 +98,8 @@ class form(customtkinter.CTkFrame):
             height=45,
             fg_color=FormColors.ENTRY_BACKGROUND,  # Fundo escuro para inputs
             border_color=FormColors.ENTRY_BORDER,  # Borda azul Excel
-            text_color=FormColors.ENTRY_TEXT  # Texto branco
+            text_color=FormColors.ENTRY_TEXT,  # Texto branco
+            show=show
         )
         inputBox.pack(padx=20, pady=10) 
         return inputBox
