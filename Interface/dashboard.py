@@ -12,16 +12,17 @@ do aplicativo de gerenciamento de planilhas. Inclui funcionalidades para:
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
+from PIL import Image
+from Interface.Fonts.fonts import Fonts
+from Interface.colors import DashboardColors, ViewColors, ExcelColors
 import tkinter.filedialog as filedialog
+from Interface.Classes.folders import folder
 import os 
 import glob
 import openpyxl
 import os
 import customtkinter
 import sys
-from PIL import Image
-from Interface.Fonts.fonts import Fonts
-from Interface.colors import DashboardColors, ViewColors, ExcelColors
 
 class Dashboard(customtkinter.CTkFrame):
     """
@@ -432,12 +433,12 @@ class Dashboard(customtkinter.CTkFrame):
         
         wb = Workbook()
         ws = wb.active
-        ws.title = "Alunos"
+        ws.title = "Alunos" # type: ignore
         
         # Configurar cabeçalho com estilo Excel
         headers = ["NOME",	"ETAPA",	"Critério",	"STATUS",	"Qualidade",	"Comunicação",	"Aprendizado",	"Conhecimento"]
         for col_num, header in enumerate(headers, start=1):
-            cell = ws.cell(row=1, column=col_num, value=header)
+            cell = ws.cell(row=1, column=col_num, value=header) # type: ignore
             cell.font = Font(bold=True, color="FFFFFF")  # Texto branco
             cell.fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")  # Azul Excel
         
@@ -516,7 +517,7 @@ class Dashboard(customtkinter.CTkFrame):
             self.result_textbox.insert("0.0", "Nenhuma planilha selecionada para gerar pastas.")
             return
         
-        from Interface.Classes.folders import folder
+        
         
         for file_path in selected_files:
             try:
