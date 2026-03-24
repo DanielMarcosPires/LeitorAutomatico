@@ -1,6 +1,0 @@
-Relatorio do(a) cliente: Antonia Aparecida Ferreira
-==============================
-Linhas: 1
-Total mão de obra: R$ 0.00
-Total cobrado (domínio+hospedagem): R$ 0.00
-Total geral: R$ 0.00

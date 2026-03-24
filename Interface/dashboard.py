@@ -1,15 +1,8 @@
-"""
-Dashboard para gerenciamento de planilhas Excel.
-
-Este módulo contém a classe Dashboard que implementa a interface principal
-do aplicativo de gerenciamento de planilhas. Inclui funcionalidades para:
-- Criar novas planilhas Excel
-- Ler e processar planilhas existentes
-- Gerar pastas organizadas por cliente
-- Visualizar dados em interface gráfica
-- Criar relatórios consolidados
-"""
-
+from datetime import datetime
+from docx import Document
+from docx.shared import Pt, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+import pandas as pd
 import tksvg
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
@@ -26,13 +19,6 @@ import customtkinter
 import sys
 
 class Dashboard(customtkinter.CTkFrame):
-    """
-    Classe principal do dashboard de gerenciamento de planilhas.
-    
-    Organiza a interface em dois painéis:
-    - Esquerdo: Botões de ação
-    - Direito: Lista de planilhas disponíveis e área de resultados
-    """
     fonts = Fonts()
     
     def __init__(self, master, **kwargs):
@@ -53,7 +39,6 @@ class Dashboard(customtkinter.CTkFrame):
         
         # Configurar a lista de planilhas no frame direito
         self.excel_list()
-    
     
     def _load_icons(self):
         """Carrega os ícones dos botões a partir da pasta Interface/icon/."""
@@ -411,11 +396,11 @@ class Dashboard(customtkinter.CTkFrame):
             # Salvar cor atual antes do hover
             current_color = frame.cget("fg_color")
             frame._original_color = current_color
-            frame.configure(fg_color="#A04800") 
+            frame.configure(fg_color="#383700", border_color="#FFD133")  # Azul Excel no hover
         else:
             # Restaurar cor original
             if hasattr(frame, '_original_color'):
-                frame.configure(fg_color=frame._original_color)
+                frame.configure(fg_color="#383700", border_color="#ffd133")
     
     def _update_checkbox_background(self, frame, checkbox):
         """
@@ -427,9 +412,9 @@ class Dashboard(customtkinter.CTkFrame):
         - Hover: Azul mais claro (#6B9BD1)
         """
         if checkbox.get() == 1:  # Selecionado
-            frame.configure(fg_color="#A04800")
+            frame.configure(fg_color="#383700", border_color="#ffd133")  # Azul Excel para selecionado
         else:  # Não selecionado
-            frame.configure(fg_color="#2a2a2a")  # Fundo escuro
+            frame.configure(fg_color="#2a2a2a", border_color="#404040")  # Fundo escuro
     
     def load_excel_files(self):
         """
@@ -600,61 +585,168 @@ class Dashboard(customtkinter.CTkFrame):
     
     def read_and_create_client_folders(self):
         """
-        Processa planilhas selecionadas e cria relatórios consolidados por cliente.
-        
-        Gera arquivos de resumo financeiro na pasta Clientes/,
-        consolidando dados de mão de obra, domínio e hospedagem.
+        Cria a estrutura: Projetos > [NomeDaPlanilha] > [NomeDaPessoa] > Relatorio.docx
         """
         selected_files = [path for checkbox, path in self.checkboxes.items() if checkbox.get() == 1]
+        
         if not selected_files:
             self.result_textbox.delete("0.0", "end")
-            self.result_textbox.insert("0.0", "Nenhuma planilha selecionada para relatório.")
+            self.result_textbox.insert("0.0", "Nenhuma planilha selecionada.")
             return
 
         summary = []
+        
         for file_path in selected_files:
             try:
+                project_name = os.path.splitext(os.path.basename(file_path))[0]
                 wb = openpyxl.load_workbook(file_path, data_only=True)
                 sheet = wb.active
+                
+                count_processed = 0
 
-                clients = {}
-                for row in sheet.iter_rows(min_row=2, values_only=True): # pyright: ignore[reportOptionalMemberAccess]
-                    if not row or not row[0]:
+                for row in sheet.iter_rows(min_row=2, values_only=True):
+                    if not row or row[0] is None:
                         continue
-                    client = str(row[0]).strip()
-                    mano_obra = self._parse_currency(row[2])  # type: ignore # Valor Mão de Obra
-                    cobrado_dominio = self._parse_currency(row[4]) if len(row) > 4 else 0.0  # pyright: ignore[reportAttributeAccessIssue] # Cobrado (Domínio)
-                    cobrado_hospedagem = self._parse_currency(row[6]) if len(row) > 6 else 0.0  # type: ignore # Cobrado (Hospedagem)
+                    
+                    nome_pessoa = str(row[0]).strip()
+                    
+                    # Coleta de dados baseada na sua imagem
+                    dados = {
+                        "Etapa": str(row[1]) if len(row) > 1 else "-",
+                        "Status": str(row[3]) if len(row) > 3 else "-",
+                        "Qualidade": str(row[4]) if len(row) > 4 else "-",
+                        "Comunicação": str(row[5]) if len(row) > 5 else "-",
+                        "Aprendizado": str(row[6]) if len(row) > 6 else "-",
+                        "Conhecimento": str(row[7]) if len(row) > 7 else "-"
+                    }
+                    # --- LÓGICA DO TEXTO DINÂMICO ---
+                    if "Férias" in dados["Status"] or "Férias" in dados["Etapa"]:
+                        desc_texto = "Registro de pausa programada. Devido ao período de férias, não há dados de performance registrados. A tabela reflete apenas o status administrativo."
+                    elif "Não entregue" in dados["Etapa"] or "atraso" in dados["Status"].lower():
+                        desc_texto = "Este relatório indica que a atividade ainda não atingiu o estado de conclusão esperado. É fundamental a regularização dos pontos abaixo para nova avaliação."
+                    elif "Ótimo" in dados["Qualidade"] and "Ótimo" in dados["Comunicação"]:
+                        desc_texto = "O colaborador apresenta um aproveitamento integral das competências. Os indicadores abaixo demonstram alto nível de clareza e domínio técnico."
+                    else:
+                        desc_texto = "A etapa foi concluída e os requisitos atendidos. A tabela abaixo detalha o equilíbrio entre os critérios técnicos e oportunidades de refinamento."                    
 
-                    total = mano_obra + cobrado_dominio + cobrado_hospedagem
-                    if client not in clients:
-                        clients[client] = {
-                            'mano_obra': 0.0,
-                            'cobrado': 0.0,
-                            'total': 0.0,
-                            'linhas': 0
-                        }
-                    clients[client]['mano_obra'] += mano_obra
-                    clients[client]['cobrado'] += (cobrado_dominio + cobrado_hospedagem)
-                    clients[client]['total'] += total
-                    clients[client]['linhas'] += 1
+                    # Criar diretórios
+                    person_dir = os.path.join('Projetos', project_name, nome_pessoa)
+                    os.makedirs(person_dir, exist_ok=True)
 
-                for client, data in clients.items():
-                    client_dir = os.path.join('Clientes', client)
-                    os.makedirs(client_dir, exist_ok=True)
+                    # --- GERAÇÃO DO ARQUIVO WORD ---
+                    doc = Document()
 
-                    with open(os.path.join(client_dir, 'resumo.txt'), 'w', encoding='utf-8') as f:
-                        f.write(f"Relatorio do(a) cliente: {client}\n")
-                        f.write("="*30 + "\n")
-                        f.write(f"Linhas: {data['linhas']}\n")
-                        f.write(f"Total mão de obra: R$ {data['mano_obra']:.2f}\n")
-                        f.write(f"Total cobrado (domínio+hospedagem): R$ {data['cobrado']:.2f}\n")
-                        f.write(f"Total geral: R$ {data['total']:.2f}\n")
+                    # Configuração de Fonte Global (Arial para profissionalismo)
+                    style = doc.styles['Normal']
+                    font = style.font
+                    font.name = 'Roboto'
+                    font.size = Pt(11)
 
-                summary.append(f"{os.path.basename(file_path)}: processado {len(clients)} clientes")
+                    # Cabeçalho de Identificação
+                    p_id = doc.add_paragraph()
+                    run_relatoryTitle = p_id.add_run("Relatório de desempenho:\n")
+                    run_relatoryTitle.font.size = Pt(20)
+                    run_relatoryTitle.font.bold = True
+                    
+                    run_colaborador = p_id.add_run("Colaborador(a): ")
+                    run_colaborador.font.bold = True
+                    run_colaborador_name = p_id.add_run(f"{nome_pessoa}\n")
+                    
+                    run_colaborador.font.size = Pt(16)
+                    run_colaborador_name.font.size = Pt(16)
+                    
+                    run_project = p_id.add_run("Projeto: ")
+                    run_project.font.bold = True
+                    run_project_name = p_id.add_run(f"{project_name}\n")
+                    
+                    run_project.font.size = Pt(16)
+                    run_project_name.font.size = Pt(16)
+                    
+                    run_data = p_id.add_run("Data de Emissão: ")
+                    run_data.font.bold = True
+                    run_data_value = p_id.add_run(f"{pd.Timestamp.now().strftime('%d/%m/%Y')} às {pd.Timestamp.now().strftime('%H:%M')}\n")
+                    
+                    run_data.font.size = Pt(16)
+                    run_data_value.font.size = Pt(16)
+                    
+                    # Texto de Introdução
+                    intro = doc.add_paragraph()
+                    title_info = intro.add_run("Informações de desempenho:")
+                    title_info.bold = True
+                    title_info.font.size = Pt(20)
+                    
+                    intro.add_run("\n" + desc_texto).font.size = Pt(16) # O texto dinâmico baseado nos dados da planilha
+
+                    # --- TABELA DE AVALIAÇÃO ESTILIZADA ---
+                    # Usando um estilo mais limpo que o 'Table Grid'
+                    table = doc.add_table(rows=1, cols=2)
+                    table.style = 'Light Grid Accent 1' 
+
+                    hdr_cells = table.rows[0].cells
+                    hdr_cells[0].text = 'CRITÉRIO'
+                    hdr_cells[1].text = 'AVALIAÇÃO'
+
+                    # Preenchendo os dados técnicos com lógica de cores
+                    for chave, valor in dados.items():
+                        row_cells = table.add_row().cells
+                        row_cells[0].text = str(chave).upper()
+                        
+                        # Adicionando o valor com destaque
+                        p_celula = row_cells[1].paragraphs[0]
+                        run_valor = p_celula.add_run(str(valor))
+                        
+                        # Aplicação de cores baseada no seu padrão de dados
+                        if "Ótimo" in str(valor):
+                            run_valor.font.color.rgb = RGBColor(0, 128, 0) # Verde
+                            run_valor.bold = True
+                        elif "Regular" in str(valor):
+                            run_valor.font.color.rgb = RGBColor(128, 0, 128) # Roxo (seu padrão)
+                        elif "Com atraso" in str(valor) or "Não" in str(valor):
+                            run_valor.font.color.rgb = RGBColor(200, 0, 0) # Vermelho
+
+                    doc.add_paragraph() # Espaço pós tabela
+
+                    # Seção de Conclusão
+                    conclusao = doc.add_paragraph()
+                    textConclusao = conclusao.add_run("Observações: ")
+                    textConclusao.bold = True
+                    textConclusao.font.size = Pt(16)
+                    textConclusao_info =conclusao.add_run("Os critérios acima são fundamentais para o acompanhamento da qualidade e evolução do projeto.")
+                    textConclusao_info.font.size = Pt(16)
+
+                    # --- RODAPÉ DE AUTORIA ---
+                    doc.add_paragraph("\n") # Um espaço em branco antes do rodapé
+                    # 1. Acessa a primeira seção do documento
+                    section = doc.sections[0]
+
+                    # 2. Acessa o rodapé daquela seção
+                    footer = section.footer
+
+                    # 3. O rodapé já vem com um parágrafo padrão, vamos usá-lo ou adicionar um novo
+                    # Se quiser limpar o que já existe:
+                    p_footer = footer.paragraphs[0] 
+                    p_footer.alignment = WD_ALIGN_PARAGRAPH.LEFT
+
+                    # 4. Adiciona o seu texto de autoria
+                    run_msg = p_footer.add_run("Relatório gerado pelo LeitorDePlanilhas desenvolvido pelo autor: \n")
+                    run_msg.font.size = Pt(10)
+                    run_msg.italic = True
+
+                    run_autor = p_footer.add_run("DaniTechnologia/Daniel Marcos Pires")
+                    run_autor.font.size = Pt(11)
+                    run_autor.bold = True
+                    run_autor.font.color.rgb = RGBColor(31, 73, 125) # Azul escuro
+                    # Salvar o arquivo .docx
+                    doc_path = os.path.join(person_dir, f'Relatorio_{nome_pessoa}.docx')
+                    doc.save(doc_path)
+                    # -------------------------------
+
+                    count_processed += 1
+
+                summary.append(f"Sucesso: {project_name} ({count_processed} Words gerados)")
 
             except Exception as e:
-                summary.append(f"Erro ao processar {os.path.basename(file_path)}: {str(e)}")
+                summary.append(f"Erro em {os.path.basename(file_path)}: {str(e)}")
 
         self.result_textbox.delete("0.0", "end")
         self.result_textbox.insert("0.0", "\n".join(summary))

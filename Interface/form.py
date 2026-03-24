@@ -45,8 +45,8 @@ class form(customtkinter.CTkFrame):
         username = dados["username"]
         password = dados["password"]
 
-        usernameKey = "DanielMarcos"
-        passwordKey = "1234"
+        usernameKey = ""
+        passwordKey = ""
 
         if username == usernameKey and password == passwordKey:
             # Login bem-sucedido, notificar o app
