@@ -1,22 +1,25 @@
+# --- BIBLIOTECAS PADRÃO (Nativas do Python) ---
+import os
+import sys
+import glob
 from datetime import datetime
+
+# --- BIBLIOTECAS EXTERNAS (Instaladas via pip) ---
+import pandas as pd
+import openpyxl
+import customtkinter
+import tksvg
+from PIL import Image
 from docx import Document
 from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-import pandas as pd
-import tksvg
 from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment
-from PIL import Image
+from openpyxl.styles import Font, PatternFill
+
+# --- MÓDULOS INTERNOS (DaniTechnologia) ---
 from Interface.Fonts.fonts import Fonts
-from Interface.colors import DashboardColors, ViewColors, InterfaceColors
-import tkinter.filedialog as filedialog
+from Interface.colors import DashboardColors
 from Interface.Classes.folders import folder
-import os 
-import glob
-import openpyxl
-import os
-import customtkinter
-import sys
 
 class Dashboard(customtkinter.CTkFrame):
     fonts = Fonts()
@@ -39,35 +42,6 @@ class Dashboard(customtkinter.CTkFrame):
         
         # Configurar a lista de planilhas no frame direito
         self.excel_list()
-    
-    def _load_icons(self):
-        """Carrega os ícones dos botões a partir da pasta Interface/icon/."""
-        self.icons = {}
-        
-        # Mapeamento de nomes de ícones para arquivos
-        icon_files = {
-            'relatory': 'relatory.png',
-            'view': 'view.png', 
-            'reload': 'reload.png',
-            'exit': 'exit.png',
-            'excel_logo': 'cells.png',
-            'trash': 'trash.png',
-            'folder': 'folder.png'
-        }
-        
-        # Caminho base para os ícones
-        icon_base_path = os.path.join(os.path.dirname(__file__), 'icon')
-        
-        for icon_name, filename in icon_files.items():
-            icon_path = os.path.join(icon_base_path, filename)
-            try:
-                # Carregar imagem com PIL e redimensionar para 20x20 pixels
-                pil_image = Image.open(icon_path)
-                pil_image = pil_image.resize((20, 20), Image.Resampling.LANCZOS)
-                self.icons[icon_name] = customtkinter.CTkImage(light_image=pil_image, dark_image=pil_image, size=(20, 20))
-            except (FileNotFoundError, OSError) as e:
-                print(f"Aviso: Ícone '{filename}' não encontrado em {icon_path}. Usando texto apenas.")
-                self.icons[icon_name] = None
     
     def title(self):
         """Configura o título principal com botão Sair na direita."""
@@ -139,6 +113,35 @@ class Dashboard(customtkinter.CTkFrame):
         )
         self.right_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
     
+    def _load_icons(self):
+        """Carrega os ícones dos botões a partir da pasta Interface/icon/."""
+        self.icons = {}
+        
+        # Mapeamento de nomes de ícones para arquivos
+        icon_files = {
+            'relatory': 'relatory.png',
+            'view': 'view.png', 
+            'reload': 'reload.png',
+            'exit': 'exit.png',
+            'excel_logo': 'cells.png',
+            'trash': 'trash.png',
+            'folder': 'folder.png'
+        }
+        
+        # Caminho base para os ícones
+        icon_base_path = os.path.join(os.path.dirname(__file__), 'icon')
+        
+        for icon_name, filename in icon_files.items():
+            icon_path = os.path.join(icon_base_path, filename)
+            try:
+                # Carregar imagem com PIL e redimensionar para 20x20 pixels
+                pil_image = Image.open(icon_path)
+                pil_image = pil_image.resize((20, 20), Image.Resampling.LANCZOS)
+                self.icons[icon_name] = customtkinter.CTkImage(light_image=pil_image, dark_image=pil_image, size=(20, 20))
+            except (FileNotFoundError, OSError) as e:
+                print(f"Aviso: Ícone '{filename}' não encontrado em {icon_path}. Usando texto apenas.")
+                self.icons[icon_name] = None
+    
     def logoDevice(self):
         """Unifica ACELERA e G&P na mesma linha corrigindo o erro de fonte"""
         ctkTitle = customtkinter.CTkTextbox(
@@ -174,7 +177,7 @@ class Dashboard(customtkinter.CTkFrame):
         ctkTitle = customtkinter.CTkTextbox(
             self.left_frame, 
             height=30, 
-            font=self.fonts.LOGO if not fontFamily else (fontFamily, 24, weight or "bold"),
+            font=self.fonts.LOGO if not fontFamily else (fontFamily, 24, weight or "bold"), # type: ignore
             text_color=DashboardColors.LEFT_TITLE_TEXT
         )
         ctkTitle.tag_config("center", justify='center')
@@ -213,7 +216,7 @@ class Dashboard(customtkinter.CTkFrame):
             font=self.fonts.BUTTON_LARGE,
             compound="left",
             anchor="w",
-            command=self.read_and_create_client_folders
+            command=self.read_and_create_report
         )
         btn_relatorio.pack(side="bottom",fill="x", pady=6, anchor="w", padx=8)
 
@@ -554,19 +557,13 @@ class Dashboard(customtkinter.CTkFrame):
         self.result_textbox.insert("0.0", "\n".join(results))
     
     def generate_folders(self):
-        """
-        Gera pastas organizadas por cliente a partir das planilhas selecionadas.
-        
-        Para cada planilha selecionada, cria uma estrutura de diretórios
-        baseada nos nomes dos clientes encontrados.
-        """
+        """Gera pastas com o nome da tabela e subpastas para cada nome listado na primeira coluna das planilhas selecionadas."""
         selected_files = [path for checkbox, path in self.checkboxes.items() if checkbox.get() == 1]
         
         if not selected_files:
             self.result_textbox.delete("0.0", "end")
             self.result_textbox.insert("0.0", "Nenhuma planilha selecionada para gerar pastas.")
             return
-        
         
         
         for file_path in selected_files:
@@ -583,7 +580,7 @@ class Dashboard(customtkinter.CTkFrame):
             except Exception as e:
                 self.result_textbox.insert("end", f"Erro em {os.path.basename(file_path)}: {str(e)}\n")
     
-    def read_and_create_client_folders(self):
+    def read_and_create_report(self):
         """
         Cria a estrutura: Projetos > [NomeDaPlanilha] > [NomeDaPessoa] > Relatorio.docx
         """
@@ -604,7 +601,7 @@ class Dashboard(customtkinter.CTkFrame):
                 
                 count_processed = 0
 
-                for row in sheet.iter_rows(min_row=2, values_only=True):
+                for row in sheet.iter_rows(min_row=2, values_only=True): # type: ignore
                     if not row or row[0] is None:
                         continue
                     
@@ -638,7 +635,7 @@ class Dashboard(customtkinter.CTkFrame):
 
                     # Configuração de Fonte Global (Arial para profissionalismo)
                     style = doc.styles['Normal']
-                    font = style.font
+                    font = style.font # type: ignore
                     font.name = 'Roboto'
                     font.size = Pt(11)
 

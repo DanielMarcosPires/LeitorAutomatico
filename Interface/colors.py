@@ -1,15 +1,3 @@
-"""
-Paleta de Cores - Tema Excel para Leitor Automático
-
-Este arquivo contém todas as cores da interface organizadas por categoria.
-Para alterar o visual da aplicação, basta modificar os valores aqui.
-
-Paleta baseada no Microsoft Excel:
-- Azul Excel: #4F81BD (azul clássico do Excel)
-- Fundo escuro: #2b2b2b (fundo moderno)
-- Contraste alto: Branco em fundos escuros
-"""
-
 class InterfaceColors:
     """Paleta de cores da interface - Ajustada para Identidade ACELERA G&P"""
 
