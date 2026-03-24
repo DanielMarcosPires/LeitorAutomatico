@@ -42,6 +42,11 @@ class Dashboard(customtkinter.CTkFrame):
         
         # Configurar a lista de planilhas no frame direito
         self.excel_list()
+        
+    # ==========================================
+    # 1. MÉTODOS DE INTERFACE (UI/UX)
+    # ==========================================
+    # Tudo que desenha botões, frames e o foguete
     
     def title(self):
         """Configura o título principal com botão Sair na direita."""
@@ -79,6 +84,105 @@ class Dashboard(customtkinter.CTkFrame):
         )
         btn_sair.pack(side="right", padx=20, pady=5)
     
+    def logoText(self,text:str,fontFamily:str=None,weight:str=None): # pyright: ignore[reportArgumentType]
+        ctkTitle = customtkinter.CTkTextbox(
+            self.left_frame, 
+            height=30, 
+            font=self.fonts.LOGO if not fontFamily else (fontFamily, 24, weight or "bold"), # type: ignore
+            text_color=DashboardColors.LEFT_TITLE_TEXT
+        )
+        ctkTitle.tag_config("center", justify='center')
+        ctkTitle.insert("0.0", text)
+        ctkTitle.tag_add("center", "1.0", "end")
+        ctkTitle.configure(state="disabled")
+        ctkTitle.pack(fill="x", padx=20, pady=(20, 10))
+    
+    def buttons(self):
+        """Configura os botões de ação no painel esquerdo."""
+        # Botão Gerar Relatório
+        
+        btn_relatorio = customtkinter.CTkButton(
+            self.left_frame,
+            text="Gerar Relatório",
+            image=self.icons.get('relatory'),
+            fg_color=DashboardColors.BUTTON_CRITICAL_BACKGROUND,
+            hover_color=DashboardColors.BUTTON_HOVER,
+            text_color=DashboardColors.BUTTON_TEXT,
+            width=170,
+            height=40,
+            font=self.fonts.BUTTON_LARGE,
+            compound="left",
+            anchor="w",
+            command=self.create_report
+        )
+        btn_relatorio.pack(side="bottom",fill="x", pady=6, anchor="w", padx=8)
+
+
+        # Botão Visualizar
+        btn_visualizar = customtkinter.CTkButton(
+            self.left_frame,
+            text="Visualizar",
+            image=self.icons.get('view'),
+            fg_color=DashboardColors.BUTTON_BACKGROUND_SECONDARY,
+            hover_color=DashboardColors.BUTTON_HOVER,
+            text_color=DashboardColors.BUTTON_TEXT,
+            width=170,
+            height=40,
+            font=self.fonts.BUTTON_LARGE,
+            compound="left",
+            anchor="w",
+            command=self.view_excel_content
+        )
+        btn_visualizar.pack(side="bottom",fill="x", pady=6, anchor="w", padx=8)
+
+        # Botão Atualizar
+        btn_atualizar = customtkinter.CTkButton(
+            self.left_frame,
+            text="Atualizar",
+            image=self.icons.get('reload'),
+            fg_color=DashboardColors.BUTTON_BACKGROUND_SECONDARY,
+            hover_color=DashboardColors.BUTTON_HOVER,
+            text_color=DashboardColors.BUTTON_TEXT,
+            width=170,
+            height=40,
+            font=self.fonts.BUTTON_LARGE,
+            compound="left",
+            anchor="w",
+            command=self.load_excel_files
+        )
+        btn_atualizar.pack(side="bottom",fill="x", pady=6, anchor="w", padx=8)
+    
+    def left_title(self):
+        """Configura o título do painel esquerdo com estilo Excel."""
+        ctkTitle = customtkinter.CTkTextbox(
+            self.left_frame, 
+            height=30, 
+            font=self.fonts.SECTION_TITLE, 
+            text_color=DashboardColors.LEFT_TITLE_TEXT
+        ) 
+        ctkTitle.tag_config("center", justify='center')
+        ctkTitle.insert("0.0", "Ações")
+        ctkTitle.tag_add("center", "1.0", "end")
+        ctkTitle.configure(state="disabled")
+        ctkTitle.pack(fill="x", padx=20, pady=(20, 10))
+    
+    def adesivos(self):
+        # Caminho do arquivo
+        svg_path = os.path.join(os.path.dirname(__file__), 'icon', 'aceleraRocket.svg')
+        
+        # Criamos a imagem SVG compatível com Tkinter
+        # Nota: O CTkLabel aceita imagens do PhotoImage padrão do tksvg
+        self.adesivo_image = tksvg.SvgImage(file=svg_path, scale=1.0) # Ajuste o scale se necessário
+
+        self.adesivo_label = customtkinter.CTkLabel(
+            self.main_frame,
+            image=self.adesivo_image, # type: ignore
+            text="",
+            fg_color="transparent" # Garante que não haja fundo
+        )
+        # Para garantir que ele fique NO TOPO de tudo:
+        self.adesivo_label.place(x=70, y=150)
+    
     def main_layout(self):
         """Configura o layout principal com cores do Excel."""
         self.main_frame = customtkinter.CTkFrame(
@@ -113,35 +217,6 @@ class Dashboard(customtkinter.CTkFrame):
         )
         self.right_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
     
-    def _load_icons(self):
-        """Carrega os ícones dos botões a partir da pasta Interface/icon/."""
-        self.icons = {}
-        
-        # Mapeamento de nomes de ícones para arquivos
-        icon_files = {
-            'relatory': 'relatory.png',
-            'view': 'view.png', 
-            'reload': 'reload.png',
-            'exit': 'exit.png',
-            'excel_logo': 'cells.png',
-            'trash': 'trash.png',
-            'folder': 'folder.png'
-        }
-        
-        # Caminho base para os ícones
-        icon_base_path = os.path.join(os.path.dirname(__file__), 'icon')
-        
-        for icon_name, filename in icon_files.items():
-            icon_path = os.path.join(icon_base_path, filename)
-            try:
-                # Carregar imagem com PIL e redimensionar para 20x20 pixels
-                pil_image = Image.open(icon_path)
-                pil_image = pil_image.resize((20, 20), Image.Resampling.LANCZOS)
-                self.icons[icon_name] = customtkinter.CTkImage(light_image=pil_image, dark_image=pil_image, size=(20, 20))
-            except (FileNotFoundError, OSError) as e:
-                print(f"Aviso: Ícone '{filename}' não encontrado em {icon_path}. Usando texto apenas.")
-                self.icons[icon_name] = None
-    
     def logoDevice(self):
         """Unifica ACELERA e G&P na mesma linha corrigindo o erro de fonte"""
         ctkTitle = customtkinter.CTkTextbox(
@@ -172,95 +247,6 @@ class Dashboard(customtkinter.CTkFrame):
         
         ctkTitle.configure(state="disabled")
         ctkTitle.pack(fill="x", padx=20, pady=(20, 10))  
-        
-    def logoText(self,text:str,fontFamily:str=None,weight:str=None): # pyright: ignore[reportArgumentType]
-        ctkTitle = customtkinter.CTkTextbox(
-            self.left_frame, 
-            height=30, 
-            font=self.fonts.LOGO if not fontFamily else (fontFamily, 24, weight or "bold"), # type: ignore
-            text_color=DashboardColors.LEFT_TITLE_TEXT
-        )
-        ctkTitle.tag_config("center", justify='center')
-        ctkTitle.insert("0.0", text)
-        ctkTitle.tag_add("center", "1.0", "end")
-        ctkTitle.configure(state="disabled")
-        ctkTitle.pack(fill="x", padx=20, pady=(20, 10))
-            
-    def left_title(self):
-        """Configura o título do painel esquerdo com estilo Excel."""
-        ctkTitle = customtkinter.CTkTextbox(
-            self.left_frame, 
-            height=30, 
-            font=self.fonts.SECTION_TITLE, 
-            text_color=DashboardColors.LEFT_TITLE_TEXT
-        ) 
-        ctkTitle.tag_config("center", justify='center')
-        ctkTitle.insert("0.0", "Ações")
-        ctkTitle.tag_add("center", "1.0", "end")
-        ctkTitle.configure(state="disabled")
-        ctkTitle.pack(fill="x", padx=20, pady=(20, 10))
-    
-    def buttons(self):
-        """Configura os botões de ação no painel esquerdo."""
-        # Botão Gerar Relatório
-        
-        btn_relatorio = customtkinter.CTkButton(
-            self.left_frame,
-            text="Gerar Relatório",
-            image=self.icons.get('relatory'),
-            fg_color=DashboardColors.BUTTON_CRITICAL_BACKGROUND,
-            hover_color=DashboardColors.BUTTON_HOVER,
-            text_color=DashboardColors.BUTTON_TEXT,
-            width=170,
-            height=40,
-            font=self.fonts.BUTTON_LARGE,
-            compound="left",
-            anchor="w",
-            command=self.read_and_create_report
-        )
-        btn_relatorio.pack(side="bottom",fill="x", pady=6, anchor="w", padx=8)
-
-
-        # Botão Visualizar
-        btn_visualizar = customtkinter.CTkButton(
-            self.left_frame,
-            text="Visualizar",
-            image=self.icons.get('view'),
-            fg_color=DashboardColors.BUTTON_BACKGROUND_SECONDARY,
-            hover_color=DashboardColors.BUTTON_HOVER,
-            text_color=DashboardColors.BUTTON_TEXT,
-            width=170,
-            height=40,
-            font=self.fonts.BUTTON_LARGE,
-            compound="left",
-            anchor="w",
-            command=self.view_selected_excel
-        )
-        btn_visualizar.pack(side="bottom",fill="x", pady=6, anchor="w", padx=8)
-
-        # Botão Atualizar
-        btn_atualizar = customtkinter.CTkButton(
-            self.left_frame,
-            text="Atualizar",
-            image=self.icons.get('reload'),
-            fg_color=DashboardColors.BUTTON_BACKGROUND_SECONDARY,
-            hover_color=DashboardColors.BUTTON_HOVER,
-            text_color=DashboardColors.BUTTON_TEXT,
-            width=170,
-            height=40,
-            font=self.fonts.BUTTON_LARGE,
-            compound="left",
-            anchor="w",
-            command=self.load_excel_files
-        )
-        btn_atualizar.pack(side="bottom",fill="x", pady=6, anchor="w", padx=8)
-    
-    def open_folder_planilhas(self):
-        """Abre a pasta Planilhas/ no explorador de arquivos."""
-        planilhas_dir = os.path.join(os.getcwd(), "Planilhas")
-        if not os.path.exists(planilhas_dir):
-            os.makedirs(planilhas_dir)
-        os.startfile(planilhas_dir)  # Abrir pasta no explorador de arquivos (Windows)    
     
     def excel_list(self):
         """Configura a lista de planilhas no painel direito com título e botões no topo."""
@@ -366,34 +352,9 @@ class Dashboard(customtkinter.CTkFrame):
         )
         self.result_textbox.pack(fill="x", padx=10, pady=10)
     
-    def adesivos(self):
-        # Caminho do arquivo
-        svg_path = os.path.join(os.path.dirname(__file__), 'icon', 'aceleraRocket.svg')
-        
-        # Criamos a imagem SVG compatível com Tkinter
-        # Nota: O CTkLabel aceita imagens do PhotoImage padrão do tksvg
-        self.adesivo_image = tksvg.SvgImage(file=svg_path, scale=1.0) # Ajuste o scale se necessário
-
-        self.adesivo_label = customtkinter.CTkLabel(
-            self.main_frame,
-            image=self.adesivo_image, # type: ignore
-            text="",
-            fg_color="transparent" # Garante que não haja fundo
-        )
-        # Para garantir que ele fique NO TOPO de tudo:
-        self.adesivo_label.place(x=70, y=150)
-        
-    def logout(self):
-        """Retorna à tela de login."""
-        self.pack_forget()
-        self.master.meu_form.pack(pady=20, expand=True)  # type: ignore
-    
-    def _on_frame_hover(self, frame, is_hover):
+    def excel_list_hoverItem(self, frame, is_hover):
         """
-        Aplica efeito hover no frame usando cores do Excel no tema escuro.
-        
-        - Hover: Azul Excel claro (#6B9BD1) - feedback visual sutil
-        - Normal: Mantém a cor atual baseada na seleção
+        Aplica efeito de hover nos itens da lista de planilhas usando cores do Excel:
         """
         if is_hover:
             # Salvar cor atual antes do hover
@@ -405,7 +366,7 @@ class Dashboard(customtkinter.CTkFrame):
             if hasattr(frame, '_original_color'):
                 frame.configure(fg_color="#383700", border_color="#ffd133")
     
-    def _update_checkbox_background(self, frame, checkbox):
+    def excelItem_checkbox_activeColor(self, frame, checkbox):
         """
         Atualiza a cor de fundo do frame baseado no estado do checkbox.
         
@@ -418,6 +379,53 @@ class Dashboard(customtkinter.CTkFrame):
             frame.configure(fg_color="#383700", border_color="#ffd133")  # Azul Excel para selecionado
         else:  # Não selecionado
             frame.configure(fg_color="#2a2a2a", border_color="#404040")  # Fundo escuro
+    
+    # =========================================
+    # 2. MÉTODOS DE AÇÃO (LÓGICA DE NEGÓCIO)
+    # =========================================
+    # Tudo que processa dados, lê arquivos, gera relatórios, etc.
+    
+    def _load_icons(self):
+        """Carrega os ícones dos botões a partir da pasta Interface/icon/."""
+        self.icons = {}
+        
+        # Mapeamento de nomes de ícones para arquivos
+        icon_files = {
+            'relatory': 'relatory.png',
+            'view': 'view.png', 
+            'reload': 'reload.png',
+            'exit': 'exit.png',
+            'excel_logo': 'cells.png',
+            'trash': 'trash.png',
+            'folder': 'folder.png'
+        }
+        
+        # Caminho base para os ícones
+        icon_base_path = os.path.join(os.path.dirname(__file__), 'icon')
+        
+        for icon_name, filename in icon_files.items():
+            icon_path = os.path.join(icon_base_path, filename)
+            try:
+                # Carregar imagem com PIL e redimensionar para 20x20 pixels
+                pil_image = Image.open(icon_path)
+                pil_image = pil_image.resize((20, 20), Image.Resampling.LANCZOS)
+                self.icons[icon_name] = customtkinter.CTkImage(light_image=pil_image, dark_image=pil_image, size=(20, 20))
+            except (FileNotFoundError, OSError) as e:
+                print(f"Aviso: Ícone '{filename}' não encontrado em {icon_path}. Usando texto apenas.")
+                self.icons[icon_name] = None
+    
+    def open_folder_planilhas(self):
+        """Abre a pasta Planilhas/ no explorador de arquivos."""
+        planilhas_dir = os.path.join(os.getcwd(), "Planilhas")
+        if not os.path.exists(planilhas_dir):
+            os.makedirs(planilhas_dir)
+        os.startfile(planilhas_dir)  # Abrir pasta no explorador de arquivos (Windows)    
+    
+    
+    def logout(self):
+        """Retorna à tela de login."""
+        self.pack_forget()
+        self.master.meu_form.pack(pady=20, expand=True)  # type: ignore
     
     def load_excel_files(self):
         """
@@ -453,8 +461,8 @@ class Dashboard(customtkinter.CTkFrame):
             item_frame.pack(fill="x", padx=5, pady=2)
             
             # Adicionar eventos de mouse para hover effect
-            item_frame.bind("<Enter>", lambda e, f=item_frame: self._on_frame_hover(f, True))
-            item_frame.bind("<Leave>", lambda e, f=item_frame: self._on_frame_hover(f, False))
+            item_frame.bind("<Enter>", lambda e, f=item_frame: self.excel_list_hoverItem(f, True))
+            item_frame.bind("<Leave>", lambda e, f=item_frame: self.excel_list_hoverItem(f, False))
             
             # Checkbox dentro do frame
             checkbox = customtkinter.CTkCheckBox(
@@ -464,7 +472,7 @@ class Dashboard(customtkinter.CTkFrame):
             checkbox.pack(anchor="w", padx=10, pady=5)
             
             # Configurar callback para mudança de background
-            checkbox.configure(command=lambda f=item_frame, c=checkbox: self._update_checkbox_background(f, c))
+            checkbox.configure(command=lambda f=item_frame, c=checkbox: self.excelItem_checkbox_activeColor(f, c))
             
             # Armazenar referências
             self.checkboxes[checkbox] = file_path
@@ -580,7 +588,7 @@ class Dashboard(customtkinter.CTkFrame):
             except Exception as e:
                 self.result_textbox.insert("end", f"Erro em {os.path.basename(file_path)}: {str(e)}\n")
     
-    def read_and_create_report(self):
+    def create_report(self):
         """
         Cria a estrutura: Projetos > [NomeDaPlanilha] > [NomeDaPessoa] > Relatorio.docx
         """
@@ -748,12 +756,9 @@ class Dashboard(customtkinter.CTkFrame):
         self.result_textbox.delete("0.0", "end")
         self.result_textbox.insert("0.0", "\n".join(summary))
 
-    def view_selected_excel(self):
+    def view_excel_content(self):
         """
-        Exibe uma visualização gráfica da primeira planilha selecionada.
-        
-        Abre uma nova janela com grid responsivo mostrando os dados,
-        com cores dinâmicas baseadas no conteúdo (verde=positivo, laranja=atenção).
+            Visualiza o conteúdo da planilha Excel selecionada em uma nova janela com estilo inspirado no Excel.
         """
         # 1. PEGAR OS ARQUIVOS SELECIONADOS (Correção do erro de variável)
         selected_files = [path for checkbox, path in self.checkboxes.items() if checkbox.get() == 1]
