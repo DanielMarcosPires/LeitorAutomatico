@@ -24,6 +24,8 @@ from Interface.Classes.folders import folder
 class Dashboard(customtkinter.CTkFrame):
     fonts = Fonts()
     
+    # __init__ é o método responsável por renderizar a interface
+    
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.master.after(0, lambda: self.master.state("zoomed"))  # type: ignore 
